@@ -1,0 +1,44 @@
+const mongoose = require('mongoose'),
+    { Schema } = mongoose,
+    shortid = require('shortid');
+
+const UrlSchema = new Schema({
+  url: {type: String, required: true},
+  id: Number,
+  alias: String,
+  createAt: {type: Date, default: Date.now},
+  updateAt: {type: Date, default: Date.now}
+})
+
+const UrlModel = mongoose.model('Url', UrlSchema)
+//this.UrlModel = UrlModel
+module.exports = {
+  shortThis: async (url) => {
+    let id
+    
+    try{
+      id = await UrlModel
+        .findOne()
+        .sort('-id')
+        .exec()
+      id = id.id || 0
+    } catch(ex) {
+      id = 0
+      console.error(ex)
+    }
+    
+    let sUrl = new UrlModel({
+      url,
+      id: id + 1,
+      alias: shortid.generate(),
+    })
+    return await sUrl.save()
+  },
+  getById(id){
+    return UrlModel.findOne({id}).exec()
+  },
+  getByAlias(alias){
+    return UrlModel.findOne({alias}).exec()
+  },
+  UrlModel
+}
